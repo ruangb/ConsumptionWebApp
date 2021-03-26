@@ -39,7 +39,7 @@ namespace ConsumptionWebApp.Controllers
 
         public async Task<IActionResult> Details(long id)
         {
-            List<User> users = new List<User>();
+            User user = new User();
 
             HttpClient client = _api.Initial();
             HttpResponseMessage res = await client.GetAsync($"api/users/{id}");
@@ -48,10 +48,10 @@ namespace ConsumptionWebApp.Controllers
             {
                 var results = res.Content.ReadAsStringAsync().Result;
 
-                users = JsonConvert.DeserializeObject<List<User>>(results);
+                user = JsonConvert.DeserializeObject<User>(results);
             }
 
-            return View(users);
+            return View(user);
         }
     }
 }
