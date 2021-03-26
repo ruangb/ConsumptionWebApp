@@ -20,6 +20,11 @@ namespace ConsumptionWebApp.Controllers
             _logger = logger;
         }
 
+        public IActionResult Create()
+        {
+            return View();
+        }
+
         public async Task<IActionResult> Index()
         {
             List<User> users = new List<User>();
