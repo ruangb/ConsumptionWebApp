@@ -25,6 +25,23 @@ namespace ConsumptionWebApp.Controllers
             return View();
         }
 
+        [HttpPost]
+        public IActionResult Create(User user)
+        {
+            HttpClient client = _api.Initial();
+
+            var postTask = client.PostAsJsonAsync("api/users", user);
+            
+            postTask.Wait();
+
+            var result = postTask.Result;
+
+            if (result.IsSuccessStatusCode)
+                return RedirectToAction("Index");
+
+            return View();
+        }
+
         public async Task<IActionResult> Index()
         {
             List<User> users = new List<User>();
