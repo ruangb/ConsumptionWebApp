@@ -20,6 +20,7 @@ namespace ConsumptionWebApp.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
