@@ -1,7 +1,6 @@
 ﻿using ConsumptionWebApp.Helper;
 using ConsumptionWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -13,14 +12,23 @@ namespace ConsumptionWebApp.Controllers
     {
         UserAPI _api = new UserAPI();
 
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        public async Task<IActionResult> Index()
         {
-            _logger = logger;
+            List<User> users = new List<User>();
+
+            HttpClient client = _api.Initial();
+            HttpResponseMessage res = await client.GetAsync("api/users");
+
+            if (res.IsSuccessStatusCode)
+            {
+                var results = res.Content.ReadAsStringAsync().Result;
+
+                users = JsonConvert.DeserializeObject<List<User>>(results);
+            }
+
+            return View(users);
         }
 
-        [HttpGet]
         public IActionResult Create()
         {
             return View();
@@ -43,21 +51,38 @@ namespace ConsumptionWebApp.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Edit(long id)
         {
-            List<User> users = new List<User>();
+            User user = new User();
 
             HttpClient client = _api.Initial();
-            HttpResponseMessage res = await client.GetAsync("api/users");
+            HttpResponseMessage res = await client.GetAsync($"api/users/{id}");
 
             if (res.IsSuccessStatusCode)
             {
                 var results = res.Content.ReadAsStringAsync().Result;
 
-                users = JsonConvert.DeserializeObject<List<User>>(results);
+                user = JsonConvert.DeserializeObject<User>(results);
             }
 
-            return View(users);
+            return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(User user)
+        {
+            HttpClient client = _api.Initial();
+
+            var postTask = client.PutAsJsonAsync($"api/users/{user.Id}", user);
+
+            postTask.Wait();
+
+            var result = postTask.Result;
+
+            if (result.IsSuccessStatusCode)
+                return RedirectToAction("Index");
+
+            return View();
         }
 
         public async Task<IActionResult> Details(long id)
@@ -75,6 +100,17 @@ namespace ConsumptionWebApp.Controllers
             }
 
             return View(user);
+        }
+
+        public async Task<IActionResult> Delete(long id)
+        {
+            HttpClient client = _api.Initial();
+            HttpResponseMessage res = await client.DeleteAsync($"api/users/{id}");
+
+            if (res.IsSuccessStatusCode)
+                return RedirectToAction("Index");
+
+            return View();
         }
     }
 }
